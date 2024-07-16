@@ -38,6 +38,7 @@ function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
             </ul>
         </div>
     );
-}
+} 
+// hello
 
 export default Questions;
