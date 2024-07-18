@@ -14,26 +14,26 @@ function Quiz() {
     const result = useSelector(state => state.questions.result);
     const { queue = [], trace = 0 } = useSelector(state => state.questions);
 
-    // Next button event handler
+    
     function onNext() {
         if (trace < queue.length) {
             dispatch(MoveNextQuestion());
 
             if (result.length <= trace) {
-                // Push the index of the selected option as answer
+                
                 dispatch(PushAnswer(check));
             }
 
             setChecked(undefined);
         } else {
-            // If it's the last question, calculate score and navigate to result page
+        
             const score = calculateScore();
             dispatch(setResult(score));
             navigate('/result', { replace: true });
         }
     }
 
-    // Prev button event handler
+    
     function onPrev() {
         if (trace > 0) {
             dispatch(MovePrevQuestion());
@@ -67,7 +67,7 @@ function Quiz() {
         result.forEach((answerIndex, questionIndex) => {
             const correctAnswerIndex = questions[questionIndex].answer;
             if (answerIndex === correctAnswerIndex) {
-                score += 10; // Each correct answer gives 10 points
+                score += 10; 
             }
         });
         return score;

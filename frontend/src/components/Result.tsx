@@ -13,15 +13,15 @@ function Result() {
         result.forEach((answerIndex, questionIndex) => {
             const correctAnswerIndex = questions[questionIndex].answer;
             if (answerIndex === correctAnswerIndex) {
-                score += 10; // Each correct answer gives 10 points
+                score += 10; 
             }
         });
         return score;
     };
 
-    const totalPoints = questions.length * 10; // Total possible points
+    const totalPoints = questions.length * 10; 
     const userScore = calculateScore();
-    const passPercentage = 50; // Percentage required to pass
+    const passPercentage = 50; 
 
     const passOrFail = userScore >= (totalPoints * passPercentage / 100) ? 'Passed' : 'Failed';
 
