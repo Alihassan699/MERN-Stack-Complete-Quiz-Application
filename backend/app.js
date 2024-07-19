@@ -4,6 +4,8 @@ dotenv.config();
 import bodyParser from 'body-parser';
 import express from 'express';
 import { connectdb } from './db/connect.js';
+import router from './router/route.js'; 
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,7 +14,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 connectdb();
+ 
 
+
+
+app.use('/apis', router);
 
 
 app.get('/', (req, res) => {
