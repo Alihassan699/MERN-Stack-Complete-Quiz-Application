@@ -1,16 +1,25 @@
 import { pool } from "../config/connect.js";
 
 
-// Get all questions 
+// Get all questions or a specific question by ID
 export async function getQuestions(req, res) {
+    const { id } = req.query;
     try {
-        const result = await pool.query('SELECT * FROM questions');
-            res.json(result.rows);
-        } 
-        catch (error) {
-            res.status(500).json({ error: error.message });
+        let query = 'SELECT * FROM questions';
+        let params = [];
+        
+        if (id) {
+            query += ' WHERE id = $1';
+            params.push(id);
         }
+        
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
+
         
 
 // Insert a new question
@@ -35,24 +44,57 @@ export async function postQuestions(req, res) {
     }
 }
         
-        
-//Delete all questions  
+
+// Delete all questions or a specific question by ID
 export async function dropQuestions(req, res) {
+    const { id } = req.query;
+
     try {
-        await pool.query('DELETE FROM questions');
-        res.json({ message: "All questions deleted" });
-    }
-    catch (error) {
+        let query;
+        let params = [];
+
+        if (id) {
+            
+            const ids = id.split(',').map(i => i.trim());
+
+            
+            if (ids.some(i => isNaN(i))) {
+                return res.status(400).json({ error: 'Invalid ID format' });
+            }
+
+            
+            const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+            query = `DELETE FROM questions WHERE id IN (${placeholders})`;
+            params = ids.map(i => parseInt(i, 10));
+        } else {
+            query = 'DELETE FROM questions';
+        }
+
+        const result = await pool.query(query, params);
+        const rowCount = result.rowCount;
+
+        res.json({ message: `Questions deleted, total: ${rowCount}` });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
         
         
         
-// Get all results
+// Get all results or a specific question by ID
 export async function getresults(req, res) {
     try {
-        const result = await pool.query('SELECT * FROM results');
+        const { id, otherParam } = req.query;
+        let query = 'SELECT * FROM results';
+        let queryParams = [];
+        if (id) {
+            query += ' WHERE id = $1';
+            queryParams.push(id);
+        } else if (otherParam) {
+            query += ' WHERE other_column = $1';
+            queryParams.push(otherParam);
+        }
+        const result = await pool.query(query, queryParams);
         res.json(result.rows);
     } 
     catch (error) {
@@ -86,11 +128,21 @@ export async function storeResults(req, res) {
 
         
         
-//Delete all results  
+// Delete all results or a specific question by ID
 export async function dropresults(req, res) {
     try {
-        await pool.query('DELETE FROM results');
-        res.json({ message: "All results deleted" });
+        const { id, otherParam } = req.query;
+        let query = 'DELETE FROM results';
+        let queryParams = [];
+        if (id) {
+            query += ' WHERE id = $1';
+            queryParams.push(id);
+        } else if (otherParam) {
+            query += ' WHERE other_column = $1';
+            queryParams.push(otherParam);
+        }
+        await pool.query(query, queryParams);
+        res.json({ message: "Results deleted" });
     } 
     catch (error) {
         res.status(500).json({ error: error.message });
