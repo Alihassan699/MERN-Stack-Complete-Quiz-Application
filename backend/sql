@@ -23,3 +23,13 @@ CREATE TABLE IF NOT EXISTS results (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
+
+
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'country',
+  password: process.env.DB_PASS || 'Al!h@ss@n',
+  port: process.env.DB_PORT || 5432,
+});

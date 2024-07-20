@@ -1,12 +1,8 @@
-
 // app.js
-import { connectdb } from './config/db.js';
+import { connectdb } from './config/connect.js';
 import express from 'express';
 import bodyParser from 'body-parser';
-import router from './routes/route.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import router from './router/route.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,7 +10,11 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-connectdb();
+// Connect to the database and handle any connection errors
+connectdb().catch((error) => {
+  console.error('Failed to connect to the database:', error);
+  process.exit(1); // Exit the application if the database connection fails
+});
 
 app.use('/apis', router);
 
