@@ -1,24 +1,38 @@
 import React from 'react';
 
-function ResultTable() {
+function ResultTable({ resultsData }) {
+    console.log('Results data in ResultTable:', resultsData);
+
     return (
         <div className='container'>
             <table>
                 <thead className='table-header'>
                     <tr className='table-row'>
+                        <td>#</td>
                         <td>Name</td>
-                        <td>Attempts</td>
-                        <td>Earn Points</td>
-                        <td>Result</td>
+                        <td>Score</td>
+                        <td>Total Questions</td>
+                        <td>Correct Answers</td>
+                        <td>Date</td>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr className='table-body'>
-                        <td>Daily tuition</td> {/* Placeholder for username */}
-                        <td>03</td> {/* Placeholder for attempts */}
-                        <td>20</td> {/* Placeholder for points */}
-                        <td>Passed</td> {/* Placeholder for result */}
-                    </tr>
+                    {resultsData.length > 0 ? (
+                        resultsData.map((result, index) => (
+                            <tr key={index} className='table-body'>
+                                <td>{index + 1}</td>
+                                <td>{result.user}</td>
+                                <td>{result.score}</td>
+                                <td>{result.totalQuestions}</td>
+                                <td>{result.correctAnswers}</td>
+                                <td>{new Date(result.date).toLocaleString()}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="6">No results available</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>

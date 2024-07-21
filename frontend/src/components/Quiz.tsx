@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import Questions from './Questions';
 import { MoveNextQuestion, MovePrevQuestion, PushAnswer } from '../redux/QuestionReducer';
 import { useFetchQuestion } from '../hooks/FetchQuestion';
+import { setResult } from '../redux/ResultReducer';
+import axios from 'axios';
 
 function Quiz() {
     const [check, setChecked] = useState(undefined);
@@ -14,26 +16,51 @@ function Quiz() {
     const result = useSelector(state => state.questions.result);
     const { queue = [], trace = 0 } = useSelector(state => state.questions);
 
-    
+    const submitResults = async (score) => {
+        const payload = {
+            user: "Daily Tuitions",  // You might want to replace this with dynamic user data
+            score: score,
+            totalQuestions: queue.length,
+            correctAnswers: result.filter((answer, index) => answer === queue[index].correctOption).length,
+            date: new Date().toISOString()
+        };
+        try {
+            const response = await axios.post('http://localhost:3000/apis/results', payload);
+            if (response.status === 200) {
+                console.log('Results submitted successfully');
+            }
+        } catch (error) {
+            console.error('Error submitting results:', error);
+        }
+    };
+
+    const calculateScore = () => {
+        let score = 0;
+        result.forEach((answerIndex, questionIndex) => {
+            const correctAnswerIndex = queue[questionIndex].correctOption;
+            if (answerIndex === correctAnswerIndex) {
+                score += 10; 
+            }
+        });
+        return score;
+    };
+
     function onNext() {
         if (trace < queue.length) {
             dispatch(MoveNextQuestion());
 
             if (result.length <= trace) {
-                
                 dispatch(PushAnswer(check));
             }
-
             setChecked(undefined);
         } else {
-        
             const score = calculateScore();
             dispatch(setResult(score));
+            submitResults(score); // Submit results to the server
             navigate('/result', { replace: true });
         }
     }
 
-    
     function onPrev() {
         if (trace > 0) {
             dispatch(MovePrevQuestion());
@@ -60,17 +87,6 @@ function Quiz() {
 
     if (serverError) {
         return <h3>{serverError || "Unknown error"}</h3>;
-    }
-
-    function calculateScore() {
-        let score = 0;
-        result.forEach((answerIndex, questionIndex) => {
-            const correctAnswerIndex = questions[questionIndex].answer;
-            if (answerIndex === correctAnswerIndex) {
-                score += 10; 
-            }
-        });
-        return score;
     }
 
     return (

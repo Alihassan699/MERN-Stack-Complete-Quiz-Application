@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import Data from "../database/Data";
 import { useDispatch } from "react-redux";
 import { startExamAction } from '../redux/QuestionReducer'; 
-
+import axios from 'axios';
 
 export const useFetchQuestion = () => {
     const dispatch = useDispatch();
@@ -11,14 +10,13 @@ export const useFetchQuestion = () => {
     useEffect(() => {
         setGetData(prev => ({ ...prev, isLoading: true }));
 
-        
         (async () => {
             try {
-                let questions = Data;
+                const response = await axios.get('http://localhost:3000/apis/questions');
+                const questions = response.data;
+
                 if (questions.length > 0) {
                     setGetData(prev => ({ ...prev, isLoading: false, apiData: questions }));
-
-                    
                     dispatch(startExamAction(questions));
                 } else {
                     throw new Error("No Questions Available");

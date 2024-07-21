@@ -1,11 +1,12 @@
 // config/db.js
 import pkg from 'pg';
 const { Pool } = pkg;
-import { config } from 'dotenv';
+import { config } from "dotenv";
 
-/*
-config();
-/*
+config({ path: "./config.env" });
+
+
+
 //check env file
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_HOST:', process.env.DB_HOST);
@@ -19,16 +20,6 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
-});
-
-*/
-
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'quiz_Application',
-  password: process.env.DB_PASS || 'Al!h@ss@n',
-  port: process.env.DB_PORT || 5432,
 });
 
 
