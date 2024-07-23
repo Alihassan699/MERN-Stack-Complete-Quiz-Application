@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import '../styles/Question.css'
 
 function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
     const questions = useSelector(state => state.questions.queue);
@@ -11,7 +12,7 @@ function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
                 <h1 className='text-light'>
                     No more questions. If you want to submit your answers, please click on the submit button.
                 </h1>
-                <h1 className='text-light' >And thanks for your attention.</h1>
+                <h1 className='text-light'>And thanks for your attention.</h1>
             </>
         );
     }
@@ -22,15 +23,16 @@ function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
             <ul key={question?.id}>
                 {
                     question?.options.map((q, i) => (
-                        <li key={i}>
+                        <li key={i} className={selectedAnswers[currentQuestionIndex] === i ? 'selected' : ''}>
                             <input 
                                 type="radio"
-                                value={false}
-                                name="options"
+                                value={i}
+                                name={`options-${currentQuestionIndex}`}
                                 id={`q${i}-option`}
                                 onChange={() => onSelect(i)}
+                                checked={selectedAnswers[currentQuestionIndex] === i}
                             />
-                            <label className='text-primary' htmlFor={`q${i}-option`}>{q}</label>
+                            <label htmlFor={`q${i}-option`}>{q}</label>
                             <div className={`check ${selectedAnswers[currentQuestionIndex] === i ? 'checked' : ''}`}></div>
                         </li>
                     ))
@@ -38,7 +40,6 @@ function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
             </ul>
         </div>
     );
-} 
-// hello
+}
 
 export default Questions;

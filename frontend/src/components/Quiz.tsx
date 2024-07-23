@@ -9,6 +9,7 @@ import axios from 'axios';
 
 function Quiz() {
     const [check, setChecked] = useState(undefined);
+    const [showWarning, setShowWarning] = useState(false); // State for showing warning message
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -18,7 +19,7 @@ function Quiz() {
 
     const submitResults = async (score) => {
         const payload = {
-            user: "Daily Tuitions",  // You might want to replace this with dynamic user data
+            user: "Daily Tuitions",
             score: score,
             totalQuestions: queue.length,
             correctAnswers: result.filter((answer, index) => answer === queue[index].correctOption).length,
@@ -39,25 +40,22 @@ function Quiz() {
         result.forEach((answerIndex, questionIndex) => {
             const correctAnswerIndex = queue[questionIndex].correctOption;
             if (answerIndex === correctAnswerIndex) {
-                score += 10; 
+                score += 10;
             }
         });
         return score;
     };
 
     function onNext() {
-        if (trace < queue.length) {
+        if (check !== undefined) { // Check if an option is selected
             dispatch(MoveNextQuestion());
-
             if (result.length <= trace) {
                 dispatch(PushAnswer(check));
             }
             setChecked(undefined);
+            setShowWarning(false); // Hide the warning message
         } else {
-            const score = calculateScore();
-            dispatch(setResult(score));
-            submitResults(score); // Submit results to the server
-            navigate('/result', { replace: true });
+            setShowWarning(true); // Show the warning message
         }
     }
 
@@ -69,6 +67,7 @@ function Quiz() {
 
     function onChecked(check) {
         setChecked(check);
+        setShowWarning(false); // Hide the warning message when an option is selected
     }
 
     useEffect(() => {
@@ -92,6 +91,11 @@ function Quiz() {
     return (
         <div className="container">
             <h1 className='title text-light'>Quiz Application</h1>
+            {showWarning && (
+                <div className="warning-message m-3 font-bold text-[1.5rem]">
+                    <p className="text-light " id='warning' >Please select an option before moving to the next question.</p>
+                </div>
+            )}
             <Questions 
                 currentQuestionIndex={trace}
                 selectedAnswers={result}

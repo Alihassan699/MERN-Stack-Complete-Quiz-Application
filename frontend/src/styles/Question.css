@@ -1,0 +1,27 @@
+.option {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.option.selected {
+    background-color: #d4edda; 
+    border-color: #c3e6cb;    
+}
+
+.option.selected .text-primary {
+    color: #155724; 
+}
+
+.option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.option input[type="radio"]:checked + label {
+    color: #155724; 
+}

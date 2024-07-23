@@ -27,7 +27,7 @@ function Result() {
     const calculateScore = () => {
         let score = 0;
         result.forEach((answerIndex, questionIndex) => {
-            const correctAnswerIndex = questions[questionIndex].correctOption;
+            const correctAnswerIndex = questions[questionIndex]?.correctOption;
             if (answerIndex === correctAnswerIndex) {
                 score += 10;
             }

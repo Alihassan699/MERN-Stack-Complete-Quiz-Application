@@ -1,6 +1,5 @@
 import { pool } from "../config/connect.js";
 
-
 // Get all questions or a specific question by ID
 export async function getQuestions(req, res) {
     const { id } = req.query;
@@ -19,8 +18,6 @@ export async function getQuestions(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-
-        
 
 // Insert a new question
 export async function postQuestions(req, res) {
@@ -43,7 +40,26 @@ export async function postQuestions(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-        
+
+// Update a question by ID
+export async function updateQuestion(req, res) {
+    const { id } = req.params;
+    const { question, options, correctOption } = req.body;
+
+    if (!id || !question || !options || !correctOption) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE questions SET question = $1, options = $2, correctOption = $3 WHERE id = $4 RETURNING *',
+            [question, options, correctOption, id]
+        );
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 // Delete all questions or a specific question by ID
 export async function dropQuestions(req, res) {
@@ -54,15 +70,12 @@ export async function dropQuestions(req, res) {
         let params = [];
 
         if (id) {
-            
             const ids = id.split(',').map(i => i.trim());
 
-            
             if (ids.some(i => isNaN(i))) {
                 return res.status(400).json({ error: 'Invalid ID format' });
             }
 
-            
             const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
             query = `DELETE FROM questions WHERE id IN (${placeholders})`;
             params = ids.map(i => parseInt(i, 10));
@@ -78,10 +91,8 @@ export async function dropQuestions(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-        
-        
-        
-// Get all results or a specific question by ID
+
+// Get all results or a specific result by ID
 export async function getresults(req, res) {
     try {
         const { id, otherParam } = req.query;
@@ -101,9 +112,7 @@ export async function getresults(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-        
 
-        
 // Insert a new result
 export async function storeResults(req, res) {
     const { user, score, totalQuestions, correctAnswers } = req.body;
@@ -126,9 +135,27 @@ export async function storeResults(req, res) {
     }
 }
 
-        
-        
-// Delete all results or a specific question by ID
+// Update a result by ID
+export async function updateResult(req, res) {
+    const { id } = req.params;
+    const { user, score, totalQuestions, correctAnswers } = req.body;
+
+    if (!id || !user || score === undefined || totalQuestions === undefined || correctAnswers === undefined) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE results SET "user" = $1, score = $2, totalQuestions = $3, correctAnswers = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
+            [user, score, totalQuestions, correctAnswers, id]
+        );
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Delete all results or a specific result by ID
 export async function dropresults(req, res) {
     try {
         const { id, otherParam } = req.query;

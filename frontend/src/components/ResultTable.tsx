@@ -11,8 +11,6 @@ function ResultTable({ resultsData }) {
                         <td>#</td>
                         <td>Name</td>
                         <td>Score</td>
-                        <td>Total Questions</td>
-                        <td>Correct Answers</td>
                         <td>Date</td>
                     </tr>
                 </thead>
@@ -23,14 +21,12 @@ function ResultTable({ resultsData }) {
                                 <td>{index + 1}</td>
                                 <td>{result.user}</td>
                                 <td>{result.score}</td>
-                                <td>{result.totalQuestions}</td>
-                                <td>{result.correctAnswers}</td>
                                 <td>{new Date(result.date).toLocaleString()}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="6">No results available</td>
+                            <td colSpan="4">No results available</td>
                         </tr>
                     )}
                 </tbody>
