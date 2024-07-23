@@ -5,7 +5,8 @@ function ResultTable({ resultsData }) {
 
     return (
         <div className='container'>
-            <table>
+            <h1 className='title text-light'>Result Table</h1>
+            <table className='mt-3'>
                 <thead className='table-header'>
                     <tr className='table-row'>
                         <td>#</td>

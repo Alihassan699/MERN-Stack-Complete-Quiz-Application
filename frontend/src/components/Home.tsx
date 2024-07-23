@@ -6,7 +6,7 @@ import { setUserId } from '../redux/ResultReducer';
 import axios from 'axios';
 
 function Home() {
-    const inputRef = useRef<HTMLInputElement | null>(null);
+    const inputRef = useRef(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ function Home() {
 
             try {
                 // Post the username to the API
-                const response = await axios.post('http://localhost:3000/apis/results', {
+                await axios.post('http://localhost:3000/apis/results', {
                     user: username,
                     score: 0,
                     totalQuestions: 0,
@@ -24,15 +24,13 @@ function Home() {
                     date: new Date().toISOString()
                 });
 
-                console.log('Response from API:', response.data);
-
-                // Dispatch the username to the Redux store
+                
                 dispatch(setUserId(username));
 
-                // Navigate to the quiz page
+                
                 navigate('/quiz');
-            } catch (error: any) {
-                console.error('Error posting username to API:', error.message);
+            } catch (error) {
+                console.error('Error posting username to API:', error);
                 alert('An error occurred while starting the quiz. Please try again.');
             }
         } else {
@@ -58,8 +56,9 @@ function Home() {
             <div className="start">
                 <button className='btn' onClick={startQuiz}>Start Quiz</button>
             </div>
-            
+            <h1 className='title text-light'>Add New Questions</h1>
             <div className='start'>
+                
                 <Link className='btn' to='/QuestionForm'>Add Questions</Link>
             </div>
         </div>
