@@ -11,22 +11,26 @@ function ResultTable({ resultsData }) {
                         <td>#</td>
                         <td>Name</td>
                         <td>Score</td>
+                        <td>Total Questions</td>
+                        <td>Correct Answers</td>
                         <td>Date</td>
                     </tr>
                 </thead>
                 <tbody>
                     {resultsData.length > 0 ? (
                         resultsData.map((result, index) => (
-                            <tr key={index} className='table-body'>
+                            <tr key={result.id} className='table-body'>
                                 <td>{index + 1}</td>
                                 <td>{result.user}</td>
                                 <td>{result.score}</td>
+                                <td>{result.totalquestions}</td>
+                                <td>{result.correctanswers}</td>
                                 <td>{new Date(result.date).toLocaleString()}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="4">No results available</td>
+                            <td colSpan="6">No results available</td>
                         </tr>
                     )}
                 </tbody>
