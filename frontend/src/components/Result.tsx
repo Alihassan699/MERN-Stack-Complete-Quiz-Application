@@ -8,13 +8,13 @@ import axios from 'axios';
 function Result() {
     const result = useSelector(state => state.result.result);
     const questions = useSelector(state => state.questions.queue);
+    const user = useSelector(state => state.result.userId);
     const [resultsData, setResultsData] = useState([]);
-    const user = 'Daily Tuitions'; // Replace with actual user data if available
 
     useEffect(() => {
         const fetchResults = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/apis/result');
+                const response = await axios.get('http://localhost:3000/apis/results');
                 console.log('Fetched results:', response.data);
                 setResultsData(response.data);
             } catch (error) {

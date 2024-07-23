@@ -3,16 +3,38 @@ import { Link, useNavigate } from 'react-router-dom';
 import "../styles/Home.css";
 import { useDispatch } from 'react-redux';
 import { setUserId } from '../redux/ResultReducer';
+import axios from 'axios';
 
 function Home() {
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const startQuiz = () => {
+    const startQuiz = async () => {
         if (inputRef.current?.value) {
-            dispatch(setUserId(inputRef.current.value));
-            navigate('/quiz');
+            const username = inputRef.current.value;
+
+            try {
+                // Post the username to the API
+                const response = await axios.post('http://localhost:3000/apis/results', {
+                    user: username,
+                    score: 0,
+                    totalQuestions: 0,
+                    correctAnswers: 0,
+                    date: new Date().toISOString()
+                });
+
+                console.log('Response from API:', response.data);
+
+                // Dispatch the username to the Redux store
+                dispatch(setUserId(username));
+
+                // Navigate to the quiz page
+                navigate('/quiz');
+            } catch (error: any) {
+                console.error('Error posting username to API:', error.message);
+                alert('An error occurred while starting the quiz. Please try again.');
+            }
         } else {
             alert('Please enter your username');
         }

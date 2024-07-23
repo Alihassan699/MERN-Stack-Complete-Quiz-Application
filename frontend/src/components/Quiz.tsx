@@ -16,13 +16,14 @@ function Quiz() {
     const { isLoading, apiData, serverError } = useFetchQuestion()[0];
     const result = useSelector(state => state.questions.result);
     const { queue = [], trace = 0 } = useSelector(state => state.questions);
+    const user = useSelector(state => state.result.userId);
 
     const submitResults = async (score) => {
         const payload = {
-            user: "Daily Tuitions",
+            user: user,
             score: score,
-            totalQuestions: queue.length,
-            correctAnswers: result.filter((answer, index) => answer === queue[index].correctOption).length,
+            totalquestions: queue.length,
+            correctanswers: result.filter((answer, index) => answer === queue[index].correctOption).length,
             date: new Date().toISOString()
         };
         try {
@@ -72,6 +73,8 @@ function Quiz() {
 
     useEffect(() => {
         if (result.length && result.length >= queue.length) {
+            const score = calculateScore();
+            submitResults(score);
             navigate('/result', { replace: true });
         }
     }, [result, queue.length, navigate]);
