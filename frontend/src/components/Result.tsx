@@ -1,3 +1,4 @@
+// src/components/Result.tsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import "../styles/Result.css";
@@ -14,7 +15,7 @@ function Result() {
     useEffect(() => {
         const fetchResults = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/apis/results');
+                const response = await axios.get('http://localhost:4000/apis/results');
                 console.log('Fetched results:', response.data);
                 setResultsData(response.data);
             } catch (error) {

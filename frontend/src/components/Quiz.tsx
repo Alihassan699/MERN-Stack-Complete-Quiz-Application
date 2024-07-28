@@ -1,115 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import Questions from './Questions';
-import { MoveNextQuestion, MovePrevQuestion, PushAnswer } from '../redux/QuestionReducer';
+import { useNavigate } from 'react-router-dom';
 import { useFetchQuestion } from '../hooks/FetchQuestion';
-import { setResult } from '../redux/ResultReducer';
-import axios from 'axios';
+import Questions from './Questions';
+import { moveNextQuestion, movePrevQuestion, setSelectedAnswers } from '../redux/QuestionReducer';
 
 function Quiz() {
-    const [check, setChecked] = useState(undefined);
-    const [showWarning, setShowWarning] = useState(false); // State for showing warning message
-    const navigate = useNavigate();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const currentQuestionIndex = useSelector((state) => state.questions.trace);
+    const selectedAnswers = useSelector((state) => state.questions.selectedAnswers || []);
+    const questions = useSelector((state) => state.questions.queue);
+    const { error } = useFetchQuestion();
 
-    const { isLoading, apiData, serverError } = useFetchQuestion()[0];
-    const result = useSelector(state => state.questions.result);
-    const { queue = [], trace = 0 } = useSelector(state => state.questions);
-    const user = useSelector(state => state.result.userId);
+    const [showWarning, setShowWarning] = useState(false);
 
-    const submitResults = async (score) => {
-        const payload = {
-            user: user,
-            score: score,
-            totalquestions: queue.length,
-            correctanswers: result.filter((answer, index) => answer === queue[index].correctOption).length,
-            date: new Date().toISOString()
-        };
-        try {
-            const response = await axios.post('http://localhost:3000/apis/results', payload);
-            if (response.status === 200) {
-                console.log('Results submitted successfully');
-            }
-        } catch (error) {
-            console.error('Error submitting results:', error);
+    useEffect(() => {
+        if (error) {
+            console.error('Error fetching questions:', error);
         }
+    }, [error]);
+
+    const handleSelect = (index) => {
+        const newSelectedAnswers = [...selectedAnswers];
+        newSelectedAnswers[currentQuestionIndex] = index;
+        dispatch(setSelectedAnswers(newSelectedAnswers));
+        setShowWarning(false);
     };
 
-    const calculateScore = () => {
-        let score = 0;
-        result.forEach((answerIndex, questionIndex) => {
-            const correctAnswerIndex = queue[questionIndex].correctOption;
-            if (answerIndex === correctAnswerIndex) {
-                score += 10;
-            }
-        });
-        return score;
-    };
-
-    function onNext() {
-        if (check !== undefined) { // Check if an option is selected
-            dispatch(MoveNextQuestion());
-            if (result.length <= trace) {
-                dispatch(PushAnswer(check));
-            }
-            setChecked(undefined);
-            setShowWarning(false); // Hide the warning message
+    const handleNext = () => {
+        if (selectedAnswers[currentQuestionIndex] === undefined) {
+            setShowWarning(true);
+            return;
+        }
+        if (currentQuestionIndex < questions.length - 1) {
+            dispatch(moveNextQuestion());
         } else {
-            setShowWarning(true); // Show the warning message
+            submitQuiz();
         }
-    }
+    };
 
-    function onPrev() {
-        if (trace > 0) {
-            dispatch(MovePrevQuestion());
-        }
-    }
+    const handlePrev = () => {
+        dispatch(movePrevQuestion());
+    };
 
-    function onChecked(check) {
-        setChecked(check);
-        setShowWarning(false); // Hide the warning message when an option is selected
-    }
+    const submitQuiz = () => {
+        // Calculate the result here
+        const correctAnswers = questions.filter((question, index) => question.correctAnswer === selectedAnswers[index]);
+        const result = {
+            totalQuestions: questions.length,
+            correctAnswers: correctAnswers.length,
+            selectedAnswers,
+            questions
+        };
 
-    useEffect(() => {
-        if (result.length && result.length >= queue.length) {
-            const score = calculateScore();
-            submitResults(score);
-            navigate('/result', { replace: true });
-        }
-    }, [result, queue.length, navigate]);
-
-    useEffect(() => {
-        console.log('queue:', queue, 'trace:', trace, 'result:', result);
-    }, [queue, trace, result]);
-
-    if (isLoading) {
-        return <h3 className='text-light'>Loading...</h3>;
-    }
-
-    if (serverError) {
-        return <h3>{serverError || "Unknown error"}</h3>;
-    }
+        navigate('/result', { state: result });
+    };
 
     return (
-        <div className="container">
+        <div className='container'>
             <h1 className='title text-light'>Quiz Application</h1>
             {showWarning && (
                 <div className="warning-message m-3 font-bold text-[1.5rem]">
-                    <p className="text-light " id='warning' >Please select an option before moving to the next question.</p>
+                    <p className="text-light" id='warning'>Please select an option before moving to the next question.</p>
                 </div>
             )}
-            <Questions 
-                currentQuestionIndex={trace}
-                selectedAnswers={result}
-                onSelect={onChecked}
+            <Questions
+                currentQuestionIndex={currentQuestionIndex}
+                selectedAnswers={selectedAnswers}
+                onSelect={handleSelect}
             />
             <div className="grid">
-                <button className='btn prev' onClick={onPrev} disabled={trace === 0}>
-                    Previous
-                </button>
-                <button className='btn next' onClick={onNext}>
-                    {trace < queue.length - 1 ? 'Next' : 'Submit'}
+                <button className='btn prev' onClick={handlePrev} disabled={currentQuestionIndex === 0}>Previous</button>
+                <button className='btn next' onClick={handleNext}>
+                    {currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit'}
                 </button>
             </div>
         </div>

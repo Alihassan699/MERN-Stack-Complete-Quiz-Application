@@ -16,7 +16,7 @@ function Home() {
 
             try {
                 // Post the username to the API
-                await axios.post('http://localhost:3000/apis/results', {
+                await axios.post('http://localhost:4000/apis/results', {
                     user: username,
                     score: 0,
                     totalQuestions: 0,
@@ -24,10 +24,7 @@ function Home() {
                     date: new Date().toISOString()
                 });
 
-                
                 dispatch(setUserId(username));
-
-                
                 navigate('/quiz');
             } catch (error) {
                 console.error('Error posting username to API:', error);
@@ -58,7 +55,6 @@ function Home() {
             </div>
             <h1 className='title text-light'>Add New Questions</h1>
             <div className='start'>
-                
                 <Link className='btn' to='/QuestionForm'>Add Questions</Link>
             </div>
         </div>

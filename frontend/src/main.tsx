@@ -1,12 +1,13 @@
+// src/main.tsx
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import store from './redux/Store';
 import App from './App';
+import store from './redux/Store'; // Ensure this path is correct
 
 ReactDOM.render(
     <Provider store={store}>
-            <App />
+        <App />
     </Provider>,
     document.getElementById('root')
 );

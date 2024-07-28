@@ -3,27 +3,28 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     queue: [],
     trace: 0,
-    result: [],
+    selectedAnswers: [],
 };
 
 const questionSlice = createSlice({
     name: 'questions',
     initialState,
     reducers: {
-        startExamAction: (state, action) => {
+        setQuestions: (state, action) => {
             state.queue = action.payload;
         },
-        MoveNextQuestion: (state) => {
+        moveNextQuestion: (state) => {
             state.trace += 1;
         },
-        MovePrevQuestion: (state) => {
+        movePrevQuestion: (state) => {
             state.trace -= 1;
         },
-        PushAnswer: (state, action) => {
-            state.result.push(action.payload);
-        }
-    }
+        setSelectedAnswers: (state, action) => {
+            state.selectedAnswers = action.payload;
+        },
+    },
 });
 
-export const { startExamAction, MoveNextQuestion, MovePrevQuestion, PushAnswer } = questionSlice.actions;
+export const { setQuestions, moveNextQuestion, movePrevQuestion, setSelectedAnswers } = questionSlice.actions;
+
 export default questionSlice.reducer;

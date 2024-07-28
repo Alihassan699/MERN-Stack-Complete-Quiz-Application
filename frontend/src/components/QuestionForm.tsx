@@ -28,7 +28,6 @@ function QuestionForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Create the payload for the POST request
     const payload = {
       question: formData.question,
       options: formData.options,
@@ -36,7 +35,7 @@ function QuestionForm() {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/apis/questions', {
+      const response = await fetch('http://localhost:4000/apis/questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -52,7 +51,6 @@ function QuestionForm() {
           correctOption: ''
         });
       } else {
-        // Handle error
         alert('Failed to submit the question');
       }
     } catch (error) {

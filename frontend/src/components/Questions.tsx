@@ -1,42 +1,38 @@
+// src/components/Questions.tsx
 import React from 'react';
 import { useSelector } from 'react-redux';
-import '../styles/Question.css'
+import '../styles/Question.css';
 
 function Questions({ currentQuestionIndex, selectedAnswers, onSelect }) {
     const questions = useSelector(state => state.questions.queue);
     const question = questions[currentQuestionIndex];
 
     if (!question) {
-        return (
-            <>
-                <h1 className='text-light'>
-                    No more questions. If you want to submit your answers, please click on the submit button.
-                </h1>
-                <h1 className='text-light'>And thanks for your attention.</h1>
-            </>
-        );
+        return <div className="text-light">Loading...</div>;
     }
 
+    const handleSelect = (index) => {
+        onSelect(index);
+    };
+
     return (
-        <div className='questions'>
-            <h2 className='text-light'>{question?.question}</h2>
-            <ul key={question?.id}>
-                {
-                    question?.options.map((q, i) => (
-                        <li key={i} className={selectedAnswers[currentQuestionIndex] === i ? 'selected' : ''}>
-                            <input 
-                                type="radio"
-                                value={i}
-                                name={`options-${currentQuestionIndex}`}
-                                id={`q${i}-option`}
-                                onChange={() => onSelect(i)}
-                                checked={selectedAnswers[currentQuestionIndex] === i}
-                            />
-                            <label htmlFor={`q${i}-option`}>{q}</label>
-                            <div className={`check ${selectedAnswers[currentQuestionIndex] === i ? 'checked' : ''}`}></div>
-                        </li>
-                    ))
-                }
+        <div className="questions">
+            <h2 className="text-light">{question.question}</h2>
+            <ul key={question.id}>
+                {question.options.map((option, index) => (
+                    <li key={index}>
+                        <input
+                            type="radio"
+                            id={`q${index}-option`}
+                            name="options"
+                            value={index}
+                            checked={selectedAnswers[currentQuestionIndex] === index}
+                            onChange={() => handleSelect(index)}
+                        />
+                        <label className="text-primary" htmlFor={`q${index}-option`}>{option}</label>
+                        <div className={`check ${selectedAnswers[currentQuestionIndex] === index ? 'checked' : ''}`}></div>
+                    </li>
+                ))}
             </ul>
         </div>
     );

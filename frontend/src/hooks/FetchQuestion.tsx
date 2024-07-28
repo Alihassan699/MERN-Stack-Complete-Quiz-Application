@@ -1,31 +1,34 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { startExamAction } from '../redux/QuestionReducer'; 
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setQuestions } from '../redux/QuestionReducer';
 
 export const useFetchQuestion = () => {
     const dispatch = useDispatch();
-    const [getData, setGetData] = useState({ isLoading: false, apiData: [], serverError: null });
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        setGetData(prev => ({ ...prev, isLoading: true }));
-
-        (async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/apis/questions');
-                const questions = response.data;
-
-                if (questions.length > 0) {
-                    setGetData(prev => ({ ...prev, isLoading: false, apiData: questions }));
-                    dispatch(startExamAction(questions));
-                } else {
-                    throw new Error("No Questions Available");
-                }
-            } catch (error) {
-                setGetData(prev => ({ ...prev, isLoading: false, serverError: error.message }));
+                const response = await axios.get('http://localhost:4000/apis/questions');
+                dispatch(setQuestions(response.data));
+            } catch (err) {
+                setError(err);
             }
-        })();
+        };
+
+        fetchData();
     }, [dispatch]);
 
-    return [getData, setGetData];
-}
+    return { error };
+};
+
+export const MoveNextQuestion = () => {
+    const dispatch = useDispatch();
+    dispatch({ type: 'questions/moveNextQuestion' });
+};
+
+export const MovePrevQuestion = () => {
+    const dispatch = useDispatch();
+    dispatch({ type: 'questions/movePrevQuestion' });
+};

@@ -1,4 +1,11 @@
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
+
+export function CheckUserExit({ children }) {
+    const auth = useSelector(state => state.result.userId);
+    return auth ? children : <Navigate to="/" replace={true} />;
+}
 
 export async function getServerData(url: string, callback?: (data: any) => void) {
     try {

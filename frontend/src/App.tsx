@@ -1,3 +1,4 @@
+// src/App.tsx
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
@@ -13,7 +14,7 @@ function App() {
             element: <Home />
         },
         {
-            path: "//QuestionForm",
+            path: '/QuestionForm',
             element: <QuestionForm />
         },
         {
