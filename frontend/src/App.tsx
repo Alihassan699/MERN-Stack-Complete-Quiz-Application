@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 import Home from './components/Home';

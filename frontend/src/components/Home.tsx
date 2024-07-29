@@ -4,6 +4,7 @@ import "../styles/Home.css";
 import { useDispatch } from 'react-redux';
 import { setUserId } from '../redux/ResultReducer';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 function Home() {
     const inputRef = useRef(null);
@@ -13,11 +14,13 @@ function Home() {
     const startQuiz = async () => {
         if (inputRef.current?.value) {
             const username = inputRef.current.value;
+            const quizId = uuidv4(); // Generate a new quiz ID
 
             try {
                 // Post the username to the API
                 await axios.post('http://localhost:4000/apis/results', {
                     user: username,
+                    quizId: quizId,
                     score: 0,
                     totalQuestions: 0,
                     correctAnswers: 0,
@@ -25,7 +28,7 @@ function Home() {
                 });
 
                 dispatch(setUserId(username));
-                navigate('/quiz');
+                navigate('/quiz', { state: { quizId } });
             } catch (error) {
                 console.error('Error posting username to API:', error);
                 alert('An error occurred while starting the quiz. Please try again.');

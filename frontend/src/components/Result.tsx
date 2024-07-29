@@ -1,45 +1,43 @@
-// src/components/Result.tsx
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import "../styles/Result.css";
-import ResultTable from './ResultTable';
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 
 function Result() {
-    const result = useSelector(state => state.result.result);
-    const questions = useSelector(state => state.questions.queue);
-    const user = useSelector(state => state.result.userId);
-    const [resultsData, setResultsData] = useState([]);
+    const location = useLocation();
+    const quizId = location.state?.quizId;
+
+    const [resultData, setResultData] = useState<any>(null);
 
     useEffect(() => {
-        const fetchResults = async () => {
+        const fetchResult = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/apis/results');
-                console.log('Fetched results:', response.data);
-                setResultsData(response.data);
+                if (!quizId) {
+                    console.error('Quiz ID is not available');
+                    return;
+                }
+
+                console.log(`Fetching result for quizId: ${quizId}`); // Debugging log
+                const response = await axios.get(`http://localhost:4000/apis/results/${quizId}`);
+                setResultData(response.data);
             } catch (error) {
                 console.error('Error fetching results:', error);
             }
         };
-        fetchResults();
-    }, []);
+        
+        fetchResult();
+    }, [quizId]);
 
-    const calculateScore = () => {
-        let score = 0;
-        result.forEach((answerIndex, questionIndex) => {
-            const correctAnswerIndex = questions[questionIndex]?.correctOption;
-            if (answerIndex === correctAnswerIndex) {
-                score += 10;
-            }
-        });
-        return score;
-    };
+    if (!resultData) {
+        return <div>Loading...</div>;
+    }
 
-    const totalPoints = questions.length * 10;
-    const userScore = calculateScore();
+    const { user, score, totalquestions, correctanswers, date, created_at, updated_at } = resultData;
+    const totalQuizPoints = totalquestions * 10 || 0;
     const passPercentage = 50;
-    const passOrFail = userScore >= (totalPoints * passPercentage / 100) ? 'Passed' : 'Failed';
+    const passOrFail = score >= (totalQuizPoints * passPercentage / 100) ? 'Passed' : 'Failed';
+
+    console.log('Result Data:', resultData);  // Log the result data for debugging
 
     return (
         <div className="container">
@@ -51,26 +49,39 @@ function Result() {
                 </div>
                 <div className="flex">
                     <span>Total Quiz Points</span>
-                    <span className='bold'>{totalPoints}</span>
+                    <span className='bold'>{totalQuizPoints}</span>
                 </div>
                 <div className="flex">
                     <span>Total Questions</span>
-                    <span className='bold'>{questions.length}</span>
+                    <span className='bold'>{totalquestions || 0}</span>
                 </div>
                 <div className="flex">
                     <span>Total Attempts</span>
-                    <span className='bold'>{result.length}</span>
+                    <span className='bold'>{correctanswers || 0}</span>
+                </div>
+                <div className="flex">
+                    <span>Score</span>
+                    <span className='bold'>{score}</span>
                 </div>
                 <div className="flex">
                     <span>Quiz Result</span>
                     <span className='bold'>{passOrFail}</span>
                 </div>
+                <div className="flex">
+                    <span>Date</span>
+                    <span className='bold'>{new Date(date).toLocaleString()}</span>
+                </div>
+                <div className="flex">
+                    <span>Created At</span>
+                    <span className='bold'>{new Date(created_at).toLocaleString()}</span>
+                </div>
+                <div className="flex">
+                    <span>Updated At</span>
+                    <span className='bold'>{new Date(updated_at).toLocaleString()}</span>
+                </div>
             </div>
             <div className='start'>
                 <Link className='btn' to='/'>Restart</Link>
-            </div>
-            <div className="container">
-                <ResultTable resultsData={resultsData} />
             </div>
         </div>
     );

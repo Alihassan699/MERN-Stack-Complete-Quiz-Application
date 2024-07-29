@@ -1,4 +1,3 @@
-// app.js
 import { connectdb } from './config/connect.js';
 import express from 'express';
 import bodyParser from 'body-parser';
@@ -10,7 +9,7 @@ import { config } from 'dotenv';
 config({ path: './config.env' });
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 // Enable CORS for the frontend URL
 const frontendUrl = process.env.FRONTEND_URL;

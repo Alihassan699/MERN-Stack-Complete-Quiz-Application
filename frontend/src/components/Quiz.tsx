@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useFetchQuestion } from '../hooks/FetchQuestion';
 import Questions from './Questions';
 import { moveNextQuestion, movePrevQuestion, setSelectedAnswers } from '../redux/QuestionReducer';
+import axios from 'axios';
 
 function Quiz() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+    const quizId = location.state?.quizId;
     const currentQuestionIndex = useSelector((state) => state.questions.trace);
     const selectedAnswers = useSelector((state) => state.questions.selectedAnswers || []);
     const questions = useSelector((state) => state.questions.queue);
@@ -44,17 +47,33 @@ function Quiz() {
         dispatch(movePrevQuestion());
     };
 
-    const submitQuiz = () => {
+    const submitQuiz = async () => {
+        if (!quizId) {
+            alert('Quiz ID is not available.');
+            return;
+        }
+
         // Calculate the result here
-        const correctAnswers = questions.filter((question, index) => question.correctAnswer === selectedAnswers[index]);
+        const correctAnswers = questions.filter((question, index) => question.correctAnswer === selectedAnswers[index]).length;
         const result = {
+            user: 'testUser', 
+            quizId: quizId,
+            score: correctAnswers * 10, 
             totalQuestions: questions.length,
-            correctAnswers: correctAnswers.length,
+            correctAnswers: correctAnswers,
             selectedAnswers,
-            questions
+            date: new Date().toISOString()
         };
 
-        navigate('/result', { state: result });
+        try {
+            // Store result in backend
+            await axios.post('http://localhost:4000/apis/results', result);
+            // Navigate to result page
+            navigate('/result', { state: { quizId } });
+        } catch (error) {
+            console.error('Error submitting quiz:', error);
+            alert('An error occurred while submitting the quiz.');
+        }
     };
 
     return (

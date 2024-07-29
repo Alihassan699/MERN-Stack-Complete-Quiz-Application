@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useDispatch } from 'react-redux';
 import { setQuestions } from '../redux/QuestionReducer';
 
 export const useFetchQuestion = () => {
     const dispatch = useDispatch();
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<AxiosError | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -13,7 +13,11 @@ export const useFetchQuestion = () => {
                 const response = await axios.get('http://localhost:4000/apis/questions');
                 dispatch(setQuestions(response.data));
             } catch (err) {
-                setError(err);
+                if (axios.isAxiosError(err)) {
+                    setError(err);
+                } else {
+                    setError(new Error('An unknown error occurred') as AxiosError);
+                }
             }
         };
 
@@ -21,14 +25,4 @@ export const useFetchQuestion = () => {
     }, [dispatch]);
 
     return { error };
-};
-
-export const MoveNextQuestion = () => {
-    const dispatch = useDispatch();
-    dispatch({ type: 'questions/moveNextQuestion' });
-};
-
-export const MovePrevQuestion = () => {
-    const dispatch = useDispatch();
-    dispatch({ type: 'questions/movePrevQuestion' });
 };

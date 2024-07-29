@@ -92,83 +92,69 @@ export async function dropQuestions(req, res) {
     }
 }
 
-// Get all results or a specific result by ID
-export async function getResults(req, res) {
-    try {
-        const { id, user } = req.query;
-        let query = 'SELECT * FROM results';
-        const queryParams = [];
-
-        if (id) {
-            query += ' WHERE id = $1';
-            queryParams.push(id);
-        } else if (user) {
-            query += ' WHERE "user" = $1';
-            queryParams.push(user);
-        }
-
-        const result = await pool.query(query, queryParams);
-        res.json(result.rows);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-
-// Insert a new result
+// Insert a new result with initial values
 export async function storeResults(req, res) {
-    const { user, score, totalQuestions, correctAnswers } = req.body;
+    const { user, quizId } = req.body;
 
-    if (!user || score === undefined || totalQuestions === undefined || correctAnswers === undefined) {
+    if (!user || !quizId) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
+        console.log('Inserting result:', { user, quizId });  // Log input data
+
         const result = await pool.query(
-            'INSERT INTO results ("user", score, totalQuestions, correctAnswers, date, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW(), NOW()) RETURNING *',
-            [user, score, totalQuestions, correctAnswers]
+            'INSERT INTO results ("user", "quizId", score, totalQuestions, correctAnswers, "date", created_at, updated_at) VALUES ($1, $2, 0, 0, 0, NOW(), NOW(), NOW()) RETURNING *',
+            [user, quizId]
         );
+        
+        console.log('Result inserted:', result.rows[0]);  // Log the inserted result
         res.status(201).json(result.rows[0]);
     } catch (error) {
+        console.error('Error storing result:', error.message);  // Log detailed error
         res.status(500).json({ error: error.message });
     }
 }
 
-// Update a result by ID
-export async function updateResult(req, res) {
-    const { id } = req.params;
-    const { user, score, totalQuestions, correctAnswers } = req.body;
+// Get a specific result by quizId
+export async function getResults(req, res) {
+    try {
+        const { quizId } = req.params; // Use req.params instead of req.query
+        if (!quizId) {
+            return res.status(400).json({ error: "Quiz ID is required" });
+        }
+        console.log(`Fetching result for quizId: ${quizId}`); // Log the quizId
 
-    if (!id || !user || score === undefined || totalQuestions === undefined || correctAnswers === undefined) {
+        const result = await pool.query('SELECT * FROM results WHERE "quizId" = $1', [quizId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Result not found" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error fetching result:', error.message); // Log the error
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Update result after quiz completion
+export async function updateResult(req, res) {
+    const { quizId } = req.params;
+    const { score, totalQuestions, correctAnswers } = req.body;
+
+    if (!quizId || score === undefined || totalQuestions === undefined || correctAnswers === undefined) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
         const result = await pool.query(
-            'UPDATE results SET "user" = $1, score = $2, totalQuestions = $3, correctAnswers = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
-            [user, score, totalQuestions, correctAnswers, id]
+            'UPDATE results SET score = $1, totalQuestions = $2, correctAnswers = $3, updated_at = NOW() WHERE "quizId" = $4 RETURNING *',
+            [score, totalQuestions, correctAnswers, quizId]
         );
         res.status(200).json(result.rows[0]);
     } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-
-// Delete all results or a specific result by ID
-export async function deleteResults(req, res) {
-    const { id } = req.query;
-
-    try {
-        let query = 'DELETE FROM results';
-        const queryParams = [];
-
-        if (id) {
-            query += ' WHERE id = $1';
-            queryParams.push(id);
-        }
-
-        const result = await pool.query(query, queryParams);
-        res.json({ message: `Results deleted, total: ${result.rowCount}` });
-    } catch (error) {
+        console.error('Error updating result:', error.message);
         res.status(500).json({ error: error.message });
     }
 }

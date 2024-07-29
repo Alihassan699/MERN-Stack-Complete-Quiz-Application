@@ -4,23 +4,20 @@ const router = Router();
 import { 
     getResults, 
     storeResults, 
-    updateResult, 
-    deleteResults,
+    updateResult,
     getQuestions,
     postQuestions,
     updateQuestion,
     dropQuestions 
 } from '../controllers/controller.js';
 
-
 // Results routes
 router.route('/results')
-    .get(getResults)        
-    .post(storeResults)     
-    .delete(deleteResults); 
+    .post(storeResults);  // Store new results
 
-router.route('/results/:id')
-    .put(updateResult);
+router.route('/results/:quizId')  // Fetch and update results by quizId
+    .get(getResults)  // Fetch results
+    .put(updateResult);  // Update results
 
 // Questions routes
 router.route('/questions')

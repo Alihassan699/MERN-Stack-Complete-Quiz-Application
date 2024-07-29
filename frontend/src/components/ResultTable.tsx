@@ -1,8 +1,7 @@
+// src/components/ResultTable.tsx
 import React from 'react';
 
 function ResultTable({ resultsData }) {
-    console.log('Results data in ResultTable:', resultsData);
-
     return (
         <div className='container'>
             <h1 className='title text-light'>Result Table</h1>
@@ -24,8 +23,8 @@ function ResultTable({ resultsData }) {
                                 <td>{index + 1}</td>
                                 <td>{result.user}</td>
                                 <td>{result.score}</td>
-                                <td>{result.totalquestions}</td>
-                                <td>{result.correctanswers}</td>
+                                <td>{result.totalQuestions}</td>
+                                <td>{result.correctAnswers}</td>
                                 <td>{new Date(result.date).toLocaleString()}</td>
                             </tr>
                         ))
