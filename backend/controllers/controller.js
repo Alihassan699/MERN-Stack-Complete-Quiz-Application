@@ -1,5 +1,6 @@
 import { pool } from "../config/connect.js";
 
+
 // Get all questions or a specific question by ID
 export async function getQuestions(req, res) {
     const { id } = req.query;
@@ -141,20 +142,78 @@ export async function getResults(req, res) {
 // Update result after quiz completion
 export async function updateResult(req, res) {
     const { quizId } = req.params;
-    const { score, totalQuestions, correctAnswers } = req.body;
+    const { answers } = req.body;  // Expecting user's answers to be sent in the request body
 
-    if (!quizId || score === undefined || totalQuestions === undefined || correctAnswers === undefined) {
-        return res.status(400).json({ error: "Missing required fields" });
+    if (!quizId || !answers || !Array.isArray(answers)) {
+        return res.status(400).json({ error: "Missing or invalid required fields" });
     }
 
     try {
+        // Hardcoded correct answers
+        const correctAnswers = [
+            { id: 16, correctOption: "Paris" },
+            { id: 17, correctOption: "To compile JavaScript code 2" }
+        ];
+
+        // Calculate score
+        let score = 0;
+        let totalQuestions = correctAnswers.length;
+        let correctAnswersCount = 0;
+
+        correctAnswers.forEach(correctAnswer => {
+            const userAnswer = answers.find(a => a.questionId === correctAnswer.id);
+            if (userAnswer && userAnswer.selectedOption === correctAnswer.correctOption) {
+                score += 10;  // Assuming each question is worth 10 points
+                correctAnswersCount += 1;
+            }
+        });
+
+        // Calculate additional fields
+        const totalQuizPoints = totalQuestions * 10;
+        const passPercentage = 50;
+        const passOrFail = score >= (totalQuizPoints * passPercentage / 100) ? 'Passed' : 'Failed';
+
+        // Update result in the database
         const result = await pool.query(
-            'UPDATE results SET score = $1, totalQuestions = $2, correctAnswers = $3, updated_at = NOW() WHERE "quizId" = $4 RETURNING *',
-            [score, totalQuestions, correctAnswers, quizId]
+            'UPDATE results SET score = $1, totalQuestions = $2, correctAnswers = $3, totalQuizPoints = $4, passOrFail = $5, updated_at = NOW() WHERE "quizId" = $6 RETURNING *',
+            [score, totalQuestions, correctAnswersCount, totalQuizPoints, passOrFail, quizId]
         );
+
         res.status(200).json(result.rows[0]);
     } catch (error) {
         console.error('Error updating result:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+// Drop all results or a specific result by ID
+export async function dropResults(req, res) {
+    const { id } = req.query;
+
+    try {
+        let query;
+        let params = [];
+
+        if (id) {
+            const ids = id.split(',').map(i => i.trim());
+
+            if (ids.some(i => isNaN(i))) {
+                return res.status(400).json({ error: 'Invalid ID format' });
+            }
+
+            const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+            query = `DELETE FROM results WHERE id IN (${placeholders})`;
+            params = ids.map(i => parseInt(i, 10));
+        } else {
+            query = 'DELETE FROM results';
+        }
+
+        const result = await pool.query(query, params);
+        const rowCount = result.rowCount;
+
+        res.json({ message: `Results deleted, total: ${rowCount}` });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }

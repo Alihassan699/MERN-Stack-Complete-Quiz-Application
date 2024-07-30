@@ -9,7 +9,7 @@ import { config } from 'dotenv';
 config({ path: './config.env' });
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 
 // Enable CORS for the frontend URL
 const frontendUrl = process.env.FRONTEND_URL;

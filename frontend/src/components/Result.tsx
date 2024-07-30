@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import "../styles/Result.css";
 import axios from 'axios';
+import { setResultData } from '../redux/ResultReducer';
 
 function Result() {
     const location = useLocation();
     const quizId = location.state?.quizId;
+    const dispatch = useDispatch();
 
-    const [resultData, setResultData] = useState<any>(null);
+    const [resultData, setResultDataState] = useState<any>(null);
 
     useEffect(() => {
         const fetchResult = async () => {
@@ -17,27 +20,25 @@ function Result() {
                     return;
                 }
 
-                console.log(`Fetching result for quizId: ${quizId}`); // Debugging log
-                const response = await axios.get(`http://localhost:4000/apis/results/${quizId}`);
-                setResultData(response.data);
+                console.log(`Fetching result for quizId: ${quizId}`);
+                const response = await axios.get(`http://localhost:3000/apis/results/${quizId}`);
+                setResultDataState(response.data);
+                dispatch(setResultData(response.data));
             } catch (error) {
                 console.error('Error fetching results:', error);
             }
         };
         
         fetchResult();
-    }, [quizId]);
+    }, [quizId, dispatch]);
 
     if (!resultData) {
         return <div>Loading...</div>;
     }
 
-    const { user, score, totalquestions, correctanswers, date, created_at, updated_at } = resultData;
-    const totalQuizPoints = totalquestions * 10 || 0;
-    const passPercentage = 50;
-    const passOrFail = score >= (totalQuizPoints * passPercentage / 100) ? 'Passed' : 'Failed';
+    const { user, score, totalQuestions, correctAnswers, totalQuizPoints, passOrFail, date, created_at, updated_at } = resultData;
 
-    console.log('Result Data:', resultData);  // Log the result data for debugging
+    console.log('Result Data:', resultData);
 
     return (
         <div className="container">
@@ -53,11 +54,11 @@ function Result() {
                 </div>
                 <div className="flex">
                     <span>Total Questions</span>
-                    <span className='bold'>{totalquestions || 0}</span>
+                    <span className='bold'>{totalQuestions || 0}</span>
                 </div>
                 <div className="flex">
                     <span>Total Attempts</span>
-                    <span className='bold'>{correctanswers || 0}</span>
+                    <span className='bold'>{correctAnswers || 0}</span>
                 </div>
                 <div className="flex">
                     <span>Score</span>

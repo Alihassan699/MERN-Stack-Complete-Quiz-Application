@@ -35,7 +35,7 @@ function QuestionForm() {
     };
 
     try {
-      const response = await fetch('http://localhost:4000/apis/questions', {
+      const response = await fetch('http://localhost:3000/apis/questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

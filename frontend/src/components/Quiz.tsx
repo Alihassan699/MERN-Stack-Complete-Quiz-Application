@@ -67,7 +67,7 @@ function Quiz() {
 
         try {
             // Store result in backend
-            await axios.post('http://localhost:4000/apis/results', result);
+            await axios.post('http://localhost:3000/apis/results', result);
             // Navigate to result page
             navigate('/result', { state: { quizId } });
         } catch (error) {
